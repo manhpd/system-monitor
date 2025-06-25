@@ -1,0 +1,107 @@
+<div class="app-list-container">
+  <div class="header">
+    <h1>{{ title }}</h1>
+    <p class="subtitle">Quản lý và theo dõi các ứng dụng hệ thống</p>
+    <a routerLink="/app/add" class="btn-add-app-fab">
+      <span class="icon-plus">＋</span> Thêm ứng dụng
+    </a>
+  </div>
+
+  <div class="add-app-form" *ngIf="showAddForm">
+    <h3>Thêm ứng dụng mới</h3>
+    <form (ngSubmit)="addApp()" autocomplete="off">
+      <div class="form-row">
+        <label>Tên ứng dụng:</label>
+        <input type="text" [(ngModel)]="newApp.name" name="name" required />
+      </div>
+      <div class="form-row">
+        <label>Trạng thái:</label>
+        <select [(ngModel)]="newApp.status" name="status">
+          <option value="Running">Running</option>
+          <option value="Stopped">Stopped</option>
+          <option value="Error">Error</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Environment:</label>
+        <select [(ngModel)]="newApp.environment" name="environment">
+          <option value="demo">Demo</option>
+          <option value="staging">Staging</option>
+          <option value="production">Production</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Phiên bản:</label>
+        <input type="text" [(ngModel)]="newApp.version" name="version" required />
+      </div>
+      <div class="form-row">
+        <label>Mô tả:</label>
+        <input type="text" [(ngModel)]="newApp.description" name="description" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-save-app">Lưu</button>
+        <button type="button" class="btn-cancel-app" (click)="toggleAddForm()">Hủy</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-container">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tên ứng dụng</th>
+          <th>Trạng thái</th>
+          <th>Environment</th>
+          <th>Phiên bản</th>
+          <th>Cập nhật lần cuối</th>
+          <th>Mô tả</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of applications" class="app-row">
+          <td class="app-id">{{ app.id }}</td>
+          <td class="app-name">{{ app.name }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+              {{ app.status }}
+            </span>
+          </td>
+          <td>
+            <span class="env-badge" [ngClass]="getEnvironmentClass(app.environment)">
+              {{ app.environment }}
+            </span>
+          </td>
+          <td class="app-version">{{ app.version }}</td>
+          <td class="app-updated">{{ app.lastUpdated }}</td>
+          <td class="app-description">{{ app.description }}</td>
+          <td class="app-actions">
+            <a [routerLink]="['/app', app.id]" class="btn-detail">
+              Chi tiết
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <span class="stat-number">{{ totalApps }}</span>
+      <span class="stat-label">Tổng số ứng dụng</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">{{ runningApps }}</span>
+      <span class="stat-label">Đang chạy</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">{{ stoppedApps }}</span>
+      <span class="stat-label">Đã dừng</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">{{ errorApps }}</span>
+      <span class="stat-label">Lỗi</span>
+    </div>
+  </div>
+</div> 

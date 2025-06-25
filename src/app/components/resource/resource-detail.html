@@ -1,0 +1,236 @@
+<div class="resource-detail-container" *ngIf="resource && app">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">
+      ← Quay lại {{ app.name }}
+    </button>
+    <h1>{{ resource.name }}</h1>
+    <p class="subtitle">Chi tiết Resource (Loại: {{ resource.type }})</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <div class="tab-list">
+      <button 
+        *ngFor="let tab of tabs" 
+        class="tab-button" 
+        [class.active]="tab.active"
+        (click)="switchTab(tab.id)">
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'dashboard'">
+    <div class="dashboard-grid resource-dashboard">
+      <!-- Real-time Graph Widget -->
+      <div class="dashboard-card real-time-widget">
+        <h3>Real-time Metrics</h3>
+        <div class="chart-container">
+          <canvas #realTimeChart></canvas>
+        </div>
+        <div class="chart-info">
+          <p class="chart-description">
+            Hiển thị dữ liệu CPU, Memory và Disk usage theo thời gian thực.
+          </p>
+          <div class="chart-stats">
+            <div class="stat-mini">
+              <span class="stat-label">CPU Avg:</span>
+              <span class="stat-value">{{ cpuAverage }}%</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-label">Memory Avg:</span>
+              <span class="stat-value">{{ memoryAverage }}%</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-label">Disk Avg:</span>
+              <span class="stat-value">{{ diskAverage }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Performance Metrics Card -->
+      <div class="dashboard-card">
+        <h3>Hiệu suất</h3>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">CPU Usage</span>
+              <span class="metric-value" [ngClass]="getUsageClass(resource.cpuUsage!)">
+                {{ resource.cpuUsage }}%
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" 
+                   [ngClass]="getUsageClass(resource.cpuUsage!)"
+                   [style.width.%]="resource.cpuUsage">
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">Memory Usage</span>
+              <span class="metric-value" [ngClass]="getUsageClass(resource.memoryUsage!)">
+                {{ resource.memoryUsage }}%
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" 
+                   [ngClass]="getUsageClass(resource.memoryUsage!)"
+                   [style.width.%]="resource.memoryUsage">
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">Disk Usage</span>
+              <span class="metric-value" [ngClass]="getUsageClass(resource.diskUsage!)">
+                {{ resource.diskUsage }}%
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" 
+                   [ngClass]="getUsageClass(resource.diskUsage!)"
+                   [style.width.%]="resource.diskUsage">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Basic Information Card -->
+      <div class="dashboard-card">
+        <h3>Thông tin chi tiết</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">ID:</span>
+            <span class="info-value">{{ resource.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Tên:</span>
+            <span class="info-value">{{ resource.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Loại:</span>
+            <span class="info-value">{{ resource.type }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Trạng thái:</span>
+            <span class="status-badge" [ngClass]="getResourceStatusClass(resource.status)">
+              {{ resource.status }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">IP Address:</span>
+            <span class="info-value resource-ip">{{ resource.ipAddress }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Region:</span>
+            <span class="info-value">{{ resource.region }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Logs Card -->
+      <div class="dashboard-card" *ngIf="resource.logs && resource.logs.length > 0">
+        <h3>Log gần đây</h3>
+        <div class="logs-container">
+          <div class="log-item" *ngFor="let log of resource.logs">
+            <span class="log-time">{{ log.split(' - ')[0] }}</span>
+            <span class="log-message">{{ log.split(' - ')[1] }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configure Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'configure'">
+    <div class="configure-header">
+      <h2>Cấu hình Resource</h2>
+      <div class="configure-actions">
+        <button 
+          class="btn btn-primary" 
+          *ngIf="!isEditing"
+          (click)="toggleEdit()">
+          Chỉnh sửa
+        </button>
+        <button 
+          class="btn btn-primary"
+          *ngIf="isEditing"
+          (click)="saveConfig()">
+          Lưu
+        </button>
+        <button 
+          class="btn btn-secondary" 
+          *ngIf="isEditing"
+          (click)="cancelEdit()">
+          Hủy
+        </button>
+      </div>
+    </div>
+
+    <div class="configure-content" *ngIf="resource.config">
+      <div class="config-section">
+        <h3>Scaling</h3>
+        <div class="config-grid">
+          <div class="config-item">
+            <label class="config-label">Auto Scaling:</label>
+            <input 
+              type="checkbox" 
+              [checked]="resource.config.autoScaling"
+              [disabled]="!isEditing"
+              [(ngModel)]="resource.config.autoScaling">
+          </div>
+          <div class="config-item">
+            <label class="config-label">Min Instances:</label>
+            <input 
+              type="number" 
+              [value]="resource.config.minInstances"
+              [disabled]="!isEditing"
+              [(ngModel)]="resource.config.minInstances">
+          </div>
+          <div class="config-item">
+            <label class="config-label">Max Instances:</label>
+            <input 
+              type="number" 
+              [value]="resource.config.maxInstances"
+              [disabled]="!isEditing"
+              [(ngModel)]="resource.config.maxInstances">
+          </div>
+        </div>
+      </div>
+      <div class="config-section">
+        <h3>Health Check</h3>
+        <div class="config-grid">
+          <div class="config-item">
+            <label class="config-label">Health Check Path:</label>
+            <input 
+              type="text" 
+              [value]="resource.config.healthCheckPath"
+              [disabled]="!isEditing"
+              [(ngModel)]="resource.config.healthCheckPath">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="configure-content" *ngIf="!resource.config">
+      <div class="no-resources">
+        <p>Resource này không có cấu hình nào.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="resource-detail-container" *ngIf="!resource">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">
+      ← Quay lại
+    </button>
+    <h1>Không tìm thấy Resource</h1>
+    <p class="subtitle">Resource với ID {{ resourceId }} không tồn tại trong ứng dụng này.</p>
+  </div>
+</div> 

@@ -1,0 +1,44 @@
+<div class="add-app-container">
+  <div class="header">
+    <h1>Thêm ứng dụng mới</h1>
+    <p class="subtitle">Điền thông tin bên dưới để thêm ứng dụng vào hệ thống</p>
+  </div>
+  <form class="form-container" (ngSubmit)="addApp()" autocomplete="off">
+    <div class="form-group">
+      <label for="name">Tên ứng dụng:</label>
+      <input id="name" type="text" [(ngModel)]="newApp.name" name="name" required placeholder="Nhập tên ứng dụng..." />
+    </div>
+    <div class="form-group">
+      <label for="status">Trạng thái:</label>
+      <select id="status" [(ngModel)]="newApp.status" name="status">
+        <option value="Running">Running</option>
+        <option value="Stopped">Stopped</option>
+        <option value="Error">Error</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="environment">Environment:</label>
+      <select id="environment" [(ngModel)]="newApp.environment" name="environment">
+        <option value="demo">Demo</option>
+        <option value="staging">Staging</option>
+        <option value="production">Production</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="version">Phiên bản:</label>
+      <input id="version" type="text" [(ngModel)]="newApp.version" name="version" required placeholder="VD: 1.0.0" />
+    </div>
+    <div class="form-group">
+      <label for="description">Mô tả:</label>
+      <input id="description" type="text" [(ngModel)]="newApp.description" name="description" required placeholder="Mô tả ngắn gọn..." />
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()">
+        Hủy
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="submitting">
+        Thêm ứng dụng
+      </button>
+    </div>
+  </form>
+</div> 

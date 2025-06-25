@@ -1,0 +1,9 @@
+<div class="flex border-b border-[#344d65] px-4 gap-8">
+  <a *ngFor="let tab of tabs" 
+     class="flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4"
+     [ngClass]="{'border-b-[#1980e6] text-white': tab.active, 'border-b-transparent text-[#93adc8]': !tab.active}"
+     [href]="tab.href">
+    <p [ngClass]="{'text-white': tab.active, 'text-[#93adc8]': !tab.active}" 
+       class="text-sm font-bold leading-normal tracking-[0.015em]">{{ tab.label }}</p>
+  </a>
+</div> 

@@ -1,0 +1,84 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>System Dashboard</h1>
+    <p class="subtitle">Tổng quan toàn bộ hệ thống ứng dụng</p>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon icon-total">📦</div>
+      <div class="stat-info">
+        <span class="stat-number">{{ totalApps }}</span>
+        <span class="stat-label">Total Applications</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-running">🚀</div>
+      <div class="stat-info">
+        <span class="stat-number">{{ runningApps }}</span>
+        <span class="stat-label">Running</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-stopped">🛑</div>
+      <div class="stat-info">
+        <span class="stat-number">{{ stoppedApps }}</span>
+        <span class="stat-label">Stopped</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-error">⚠️</div>
+      <div class="stat-info">
+        <span class="stat-number">{{ errorApps }}</span>
+        <span class="stat-label">With Errors</span>
+      </div>
+    </div>
+     <div class="stat-card">
+      <div class="stat-icon icon-resources">⚙️</div>
+      <div class="stat-info">
+        <span class="stat-number">{{ totalResources }}</span>
+        <span class="stat-label">Total Resources</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications Grid -->
+  <div class="applications-grid-container">
+    <h2>Applications Overview</h2>
+    <div class="applications-grid">
+      <div class="app-card" *ngFor="let app of applications">
+        <div class="app-card-header">
+          <h3 class="app-name">{{ app.name }}</h3>
+          <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+            {{ app.status }}
+          </span>
+        </div>
+        <p class="app-description">{{ app.description }}</p>
+        <div class="app-card-body">
+          <div class="app-info">
+            <span class="env-badge" [ngClass]="getEnvironmentClass(app.environment)">{{ app.environment }}</span>
+            <span class="app-version">v{{ app.version }}</span>
+          </div>
+          <div class="app-resources">
+            <span>{{ app.resources.length }} Resources</span>
+          </div>
+        </div>
+        <div class="app-card-footer">
+          <div class="usage-summary">
+            <div class="usage-item">
+              <span class="usage-label">CPU</span>
+              <span class="usage-value" [ngClass]="getUsageClass(getAppResourceUsage(app).cpu)">{{ getAppResourceUsage(app).cpu }}%</span>
+            </div>
+             <div class="usage-item">
+              <span class="usage-label">Memory</span>
+              <span class="usage-value" [ngClass]="getUsageClass(getAppResourceUsage(app).memory)">{{ getAppResourceUsage(app).memory }}%</span>
+            </div>
+          </div>
+          <a [routerLink]="['/app', app.id]" class="btn btn-primary">View Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

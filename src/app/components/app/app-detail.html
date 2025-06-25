@@ -1,0 +1,203 @@
+<div class="app-detail-container" *ngIf="app">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">
+      ← Quay lại
+    </button>
+    <h1>{{ app.name }}</h1>
+    <p class="subtitle">Chi tiết ứng dụng</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <div class="tab-list">
+      <button 
+        *ngFor="let tab of tabs" 
+        class="tab-button" 
+        [class.active]="tab.active"
+        (click)="switchTab(tab.id)">
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Resources Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'resources'">
+    <div class="resource-header">
+      <h2>Resources ({{ app.resources.length }})</h2>
+      <button class="btn btn-primary">Thêm Resource</button>
+    </div>
+
+    <div class="table-container resource-table-container">
+      <table class="app-table resource-table">
+        <thead>
+          <tr>
+            <th>Tên Resource</th>
+            <th>Loại</th>
+            <th>Trạng thái</th>
+            <th>CPU</th>
+            <th>Memory</th>
+            <th>Disk</th>
+            <th>IP Address</th>
+            <th>Region</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let resource of app.resources">
+            <td class="resource-name">{{ resource.name }}</td>
+            <td>{{ resource.type }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getResourceStatusClass(resource.status)">
+                {{ resource.status }}
+              </span>
+            </td>
+            <td>
+              <div class="usage-cell">
+                <span class="metric-value" [ngClass]="getUsageClass(resource.cpuUsage)">
+                  {{ resource.cpuUsage }}%
+                </span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [ngClass]="getUsageClass(resource.cpuUsage)" [style.width.%]="resource.cpuUsage"></div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="usage-cell">
+                <span class="metric-value" [ngClass]="getUsageClass(resource.memoryUsage)">
+                  {{ resource.memoryUsage }}%
+                </span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [ngClass]="getUsageClass(resource.memoryUsage)" [style.width.%]="resource.memoryUsage"></div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="usage-cell">
+                <span class="metric-value" [ngClass]="getUsageClass(resource.diskUsage)">
+                  {{ resource.diskUsage }}%
+                </span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [ngClass]="getUsageClass(resource.diskUsage)" [style.width.%]="resource.diskUsage"></div>
+                </div>
+              </div>
+            </td>
+            <td class="resource-ip">{{ resource.ipAddress }}</td>
+            <td>{{ resource.region }}</td>
+            <td>
+              <a [routerLink]="['/app', app.id, 'resource', resource.id]" class="btn-detail">Chi tiết</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="app.resources.length === 0" class="no-resources">
+      <p>Ứng dụng này chưa có resource nào.</p>
+    </div>
+  </div>
+
+  <!-- Configure Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'configure'">
+    <div class="configure-header">
+      <h2>Cấu hình ứng dụng</h2>
+      <div class="configure-actions">
+        <button 
+          class="btn-edit" 
+          *ngIf="!isEditing"
+          (click)="toggleEdit()">
+          Chỉnh sửa
+        </button>
+        <button 
+          class="btn-save" 
+          *ngIf="isEditing"
+          (click)="saveConfig()">
+          Lưu
+        </button>
+        <button 
+          class="btn-cancel" 
+          *ngIf="isEditing"
+          (click)="cancelEdit()">
+          Hủy
+        </button>
+      </div>
+    </div>
+
+    <div class="configure-content" *ngIf="app.config">
+      <div class="config-section">
+        <h3>Cấu hình hệ thống</h3>
+        <div class="config-grid">
+          <div class="config-item">
+            <label class="config-label">Auto Restart:</label>
+            <input 
+              type="checkbox" 
+              [checked]="app.config.autoRestart"
+              [disabled]="!isEditing"
+              [(ngModel)]="app.config.autoRestart">
+          </div>
+          
+          <div class="config-item">
+            <label class="config-label">Max Memory (MB):</label>
+            <input 
+              type="number" 
+              [value]="app.config.maxMemory"
+              [disabled]="!isEditing"
+              [(ngModel)]="app.config.maxMemory"
+              min="128" 
+              max="8192">
+          </div>
+          
+          <div class="config-item">
+            <label class="config-label">Max CPU (%):</label>
+            <input 
+              type="number" 
+              [value]="app.config.maxCpu"
+              [disabled]="!isEditing"
+              [(ngModel)]="app.config.maxCpu"
+              min="10" 
+              max="100">
+          </div>
+          
+          <div class="config-item">
+            <label class="config-label">Log Level:</label>
+            <select 
+              [value]="app.config.logLevel"
+              [disabled]="!isEditing"
+              [(ngModel)]="app.config.logLevel">
+              <option value="debug">Debug</option>
+              <option value="info">Info</option>
+              <option value="warn">Warning</option>
+              <option value="error">Error</option>
+            </select>
+          </div>
+          
+          <div class="config-item">
+            <label class="config-label">Backup Enabled:</label>
+            <input 
+              type="checkbox" 
+              [checked]="app.config.backupEnabled"
+              [disabled]="!isEditing"
+              [(ngModel)]="app.config.backupEnabled">
+          </div>
+          
+          <div class="config-item">
+            <label class="config-label">Monitoring Enabled:</label>
+            <input 
+              type="checkbox" 
+              [checked]="app.config.monitoringEnabled"
+              [disabled]="!isEditing"
+              [(ngModel)]="app.config.monitoringEnabled">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-detail-container" *ngIf="!app">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">
+      ← Quay lại
+    </button>
+    <h1>Không tìm thấy ứng dụng</h1>
+    <p class="subtitle">Ứng dụng với ID {{ appId }} không tồn tại</p>
+  </div>
+</div>
