@@ -22,13 +22,19 @@ interface RealTimeData {
 interface Resource {
   id: number;
   name: string;
-  type: 'Server' | 'Database' | 'Load Balancer' | 'Cache';
+  type: 'Server' | 'Database' | 'Load Balancer' | 'Cache' | 'External Service';
   status: 'Online' | 'Offline' | 'Error';
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
-  ipAddress: string;
-  region: string;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  diskUsage?: number;
+  ipAddress?: string;
+  region?: string;
+  // External Service specific properties
+  serviceUrl?: string;
+  healthCheckUrl?: string;
+  lastHealthCheck?: string;
+  responseTime?: number; // in milliseconds
+  uptime?: string;
   config?: ResourceConfig;
   logs?: string[];
 }
@@ -82,6 +88,8 @@ export class ResourceDetailComponent implements OnInit, AfterViewInit, OnDestroy
         { id: 102, name: 'Web Server 2 (Replica)', type: 'Server', status: 'Online', cpuUsage: 48, memoryUsage: 58, diskUsage: 25, ipAddress: '192.168.1.12', region: 'us-east-1', config: { autoScaling: true, minInstances: 2, maxInstances: 10, healthCheckPath: '/health' }, logs: ['2024-07-28 10:01:00 - Syncing with primary server'] },
         { id: 103, name: 'Main Database', type: 'Database', status: 'Online', cpuUsage: 30, memoryUsage: 75, diskUsage: 40, ipAddress: '192.168.1.11', region: 'us-east-1', config: { autoScaling: false, minInstances: 1, maxInstances: 1, healthCheckPath: '/status' }, logs: ['2024-07-28 09:55:00 - DB Backup successful', '2024-07-28 09:58:00 - Query optimization routine finished'] },
         { id: 104, name: 'Redis Cache', type: 'Cache', status: 'Online', cpuUsage: 12, memoryUsage: 22, diskUsage: 5, ipAddress: '192.168.1.13', region: 'us-east-1', config: { autoScaling: false, minInstances: 1, maxInstances: 1, healthCheckPath: '/ping' }, logs: ['2024-07-28 10:02:00 - Cache hit ratio at 98%'] },
+        { id: 105, name: 'Stripe Payment Gateway', type: 'External Service', status: 'Online', serviceUrl: 'https://api.stripe.com', healthCheckUrl: 'https://api.stripe.com/health', lastHealthCheck: '2024-01-15 10:30:00', responseTime: 45, uptime: '99.99%', logs: ['2024-01-15 10:30:00 - Health check passed', '2024-01-15 10:25:00 - Payment processed successfully'] },
+        { id: 106, name: 'SendGrid Email Service', type: 'External Service', status: 'Online', serviceUrl: 'https://api.sendgrid.com', healthCheckUrl: 'https://status.sendgrid.com/api/v2/status.json', lastHealthCheck: '2024-01-15 10:29:00', responseTime: 120, uptime: '99.95%', logs: ['2024-01-15 10:29:00 - Health check passed', '2024-01-15 10:28:00 - Email delivered successfully'] },
       ],
     },
     {
@@ -119,7 +127,7 @@ export class ResourceDetailComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   ngAfterViewInit() {
-    if (this.resource) {
+    if (this.resource && this.resource.type !== 'External Service') {
       this.createChart();
       this.startRealTimeUpdates();
     }
@@ -135,16 +143,16 @@ export class ResourceDetailComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private initializeRealTimeData() {
-    if (!this.resource) return;
+    if (!this.resource || this.resource.type === 'External Service') return;
 
     const now = new Date();
     for (let i = this.maxDataPoints - 1; i >= 0; i--) {
       const time = new Date(now.getTime() - i * 2000); // 2 seconds apart
       this.realTimeData.push({
         timestamp: time.toLocaleTimeString(),
-        cpu: this.generateRandomValue(this.resource!.cpuUsage, 10),
-        memory: this.generateRandomValue(this.resource!.memoryUsage, 8),
-        disk: this.generateRandomValue(this.resource!.diskUsage, 5)
+        cpu: this.generateRandomValue(this.resource!.cpuUsage || 0, 10),
+        memory: this.generateRandomValue(this.resource!.memoryUsage || 0, 8),
+        disk: this.generateRandomValue(this.resource!.diskUsage || 0, 5)
       });
     }
   }
@@ -258,9 +266,9 @@ export class ResourceDetailComponent implements OnInit, AfterViewInit, OnDestroy
     const now = new Date();
     const newData: RealTimeData = {
       timestamp: now.toLocaleTimeString(),
-      cpu: this.generateRandomValue(this.resource.cpuUsage, 10),
-      memory: this.generateRandomValue(this.resource.memoryUsage, 8),
-      disk: this.generateRandomValue(this.resource.diskUsage, 5)
+      cpu: this.generateRandomValue(this.resource.cpuUsage || 0, 10),
+      memory: this.generateRandomValue(this.resource.memoryUsage || 0, 8),
+      disk: this.generateRandomValue(this.resource.diskUsage || 0, 5)
     };
 
     this.realTimeData.push(newData);

@@ -7,11 +7,17 @@ import { PerformanceMetricComponent } from '../performance-metric/performance-me
 interface Resource {
   id: number;
   name: string;
-  type: 'Server' | 'Database' | 'Load Balancer' | 'Cache';
+  type: 'Server' | 'Database' | 'Load Balancer' | 'Cache' | 'External Service';
   status: 'Online' | 'Offline' | 'Error';
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  diskUsage?: number;
+  // External Service specific properties
+  serviceUrl?: string;
+  healthCheckUrl?: string;
+  lastHealthCheck?: string;
+  responseTime?: number;
+  uptime?: string;
 }
 
 interface Application {
@@ -60,11 +66,30 @@ export class DashboardComponent implements OnInit {
     if (app.resources.length === 0) {
       return { cpu: 0, memory: 0 };
     }
-    const totalCpu = app.resources.reduce((sum, res) => sum + res.cpuUsage, 0);
-    const totalMemory = app.resources.reduce((sum, res) => sum + res.memoryUsage, 0);
+    
+    // Filter out external services for usage calculation
+    const regularResources = app.resources.filter(res => res.type !== 'External Service');
+    
+    if (regularResources.length === 0) {
+      return { cpu: 0, memory: 0 };
+    }
+    
+    const totalCpu = regularResources.reduce((sum, res) => sum + (res.cpuUsage || 0), 0);
+    const totalMemory = regularResources.reduce((sum, res) => sum + (res.memoryUsage || 0), 0);
     return {
-      cpu: Math.round(totalCpu / app.resources.length),
-      memory: Math.round(totalMemory / app.resources.length)
+      cpu: Math.round(totalCpu / regularResources.length),
+      memory: Math.round(totalMemory / regularResources.length)
+    };
+  }
+
+  protected getResourceBreakdown(app: Application) {
+    const regularResources = app.resources.filter(res => res.type !== 'External Service');
+    const externalServices = app.resources.filter(res => res.type === 'External Service');
+    
+    return {
+      regular: regularResources.length,
+      external: externalServices.length,
+      total: app.resources.length
     };
   }
   
@@ -100,6 +125,8 @@ export class DashboardComponent implements OnInit {
           { id: 101, name: 'Web Server 1', type: 'Server', status: 'Online', cpuUsage: 55, memoryUsage: 60, diskUsage: 25 },
           { id: 102, name: 'Web Server 2', type: 'Server', status: 'Online', cpuUsage: 48, memoryUsage: 58, diskUsage: 25 },
           { id: 103, name: 'Main Database', type: 'Database', status: 'Online', cpuUsage: 30, memoryUsage: 75, diskUsage: 40 },
+          { id: 104, name: 'Stripe Payment Gateway', type: 'External Service', status: 'Online', serviceUrl: 'https://api.stripe.com', healthCheckUrl: 'https://api.stripe.com/health', lastHealthCheck: '2024-01-15 10:30:00', responseTime: 45, uptime: '99.99%' },
+          { id: 105, name: 'SendGrid Email Service', type: 'External Service', status: 'Online', serviceUrl: 'https://api.sendgrid.com', healthCheckUrl: 'https://status.sendgrid.com/api/v2/status.json', lastHealthCheck: '2024-01-15 10:29:00', responseTime: 120, uptime: '99.95%' },
         ],
       },
       {

@@ -1264,9 +1264,45 @@ body {
 }
 
 .app-resources {
-  font-size: 0.9rem;
-  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.resource-breakdown {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.breakdown-number {
+  font-weight: 600;
+  font-size: 14px;
   color: #495057;
+}
+
+.breakdown-label {
+  font-size: 10px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.breakdown-item.external .breakdown-number {
+  color: #f9a825;
+}
+
+.breakdown-item.external .breakdown-label {
+  color: #f9a825;
 }
 
 .app-card-footer {
@@ -1302,4 +1338,168 @@ body {
 
 .resource-dashboard.dashboard-grid {
   grid-template-columns: 2fr 1fr;
+}
+
+/* Type badges for resources */
+.type-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-server {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.type-database {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.type-loadbalancer {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.type-cache {
+  background-color: #e8f5e8;
+  color: #388e3c;
+}
+
+.type-external {
+  background-color: #fff8e1;
+  color: #f9a825;
+}
+
+.type-unknown {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+/* Health check widget styles */
+.health-check-widget {
+  .health-check-container {
+    padding: 20px;
+  }
+
+  .health-status {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: #2c3e50;
+    border: 1px solid #34495e;
+  }
+
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #27ae60;
+  }
+
+  .status-indicator.status-running .status-dot {
+    background-color: #27ae60;
+  }
+
+  .status-indicator.status-stopped .status-dot {
+    background-color: #e74c3c;
+  }
+
+  .status-indicator.status-error .status-dot {
+    background-color: #f39c12;
+  }
+
+  .status-text {
+    font-weight: 600;
+    color: #ecf0f1;
+  }
+
+  .health-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .health-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: #34495e;
+    border-radius: 6px;
+    border: 1px solid #2c3e50;
+  }
+
+  .health-metric .metric-label {
+    color: #bdc3c7;
+    font-size: 14px;
+  }
+
+  .health-metric .metric-value {
+    color: #ecf0f1;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .service-urls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .url-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .url-label {
+    color: #bdc3c7;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .url-link {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 14px;
+    word-break: break-all;
+    transition: color 0.2s ease;
+  }
+
+  .url-link:hover {
+    color: #5dade2;
+    text-decoration: underline;
+  }
+}
+
+.config-note {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+}
+
+.config-note p {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.config-note strong {
+  color: #856404;
 }

@@ -62,7 +62,17 @@
             <span class="app-version">v{{ app.version }}</span>
           </div>
           <div class="app-resources">
-            <span>{{ app.resources.length }} Resources</span>
+            <span>{{ getResourceBreakdown(app).total }} Resources</span>
+            <div class="resource-breakdown" *ngIf="getResourceBreakdown(app).external > 0">
+              <span class="breakdown-item">
+                <span class="breakdown-number">{{ getResourceBreakdown(app).regular }}</span>
+                <span class="breakdown-label">Regular</span>
+              </span>
+              <span class="breakdown-item external">
+                <span class="breakdown-number">{{ getResourceBreakdown(app).external }}</span>
+                <span class="breakdown-label">External</span>
+              </span>
+            </div>
           </div>
         </div>
         <div class="app-card-footer">

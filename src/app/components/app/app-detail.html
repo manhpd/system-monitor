@@ -31,60 +31,69 @@
       <table class="app-table resource-table">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Tên Resource</th>
             <th>Loại</th>
             <th>Trạng thái</th>
-            <th>CPU</th>
-            <th>Memory</th>
-            <th>Disk</th>
-            <th>IP Address</th>
-            <th>Region</th>
-            <th></th>
+            <th>Thông số</th>
+            <th>Vị trí</th>
+            <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let resource of app.resources">
+          <tr *ngFor="let resource of app.resources" class="resource-row">
+            <td class="resource-id">{{ resource.id }}</td>
             <td class="resource-name">{{ resource.name }}</td>
-            <td>{{ resource.type }}</td>
             <td>
-              <span class="status-badge" [ngClass]="getResourceStatusClass(resource.status)">
-                {{ resource.status }}
+              <span class="type-badge" [ngClass]="getTypeClass(resource.type)">
+                {{ resource.type }}
               </span>
             </td>
             <td>
-              <div class="usage-cell">
-                <span class="metric-value" [ngClass]="getUsageClass(resource.cpuUsage)">
-                  {{ resource.cpuUsage }}%
-                </span>
-                <div class="progress-bar">
-                  <div class="progress-fill" [ngClass]="getUsageClass(resource.cpuUsage)" [style.width.%]="resource.cpuUsage"></div>
+              <span class="status-badge" [ngClass]="getStatusClass(resource.status)">
+                {{ resource.status }}
+              </span>
+            </td>
+            <td class="resource-metrics">
+              <!-- Regular resources (Server, Database, etc.) -->
+              <div *ngIf="resource.type !== 'External Service'" class="usage-metrics">
+                <div class="metric">
+                  <span class="metric-label">CPU:</span>
+                  <span class="metric-value">{{ resource.cpuUsage }}%</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Memory:</span>
+                  <span class="metric-value">{{ resource.memoryUsage }}%</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Disk:</span>
+                  <span class="metric-value">{{ resource.diskUsage }}%</span>
+                </div>
+              </div>
+              <!-- External Service -->
+              <div *ngIf="resource.type === 'External Service'" class="health-metrics">
+                <div class="metric">
+                  <span class="metric-label">Response:</span>
+                  <span class="metric-value">{{ resource.responseTime }}ms</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Uptime:</span>
+                  <span class="metric-value">{{ resource.uptime }}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Last Check:</span>
+                  <span class="metric-value">{{ resource.lastHealthCheck }}</span>
                 </div>
               </div>
             </td>
-            <td>
-              <div class="usage-cell">
-                <span class="metric-value" [ngClass]="getUsageClass(resource.memoryUsage)">
-                  {{ resource.memoryUsage }}%
-                </span>
-                <div class="progress-bar">
-                  <div class="progress-fill" [ngClass]="getUsageClass(resource.memoryUsage)" [style.width.%]="resource.memoryUsage"></div>
-                </div>
-              </div>
+            <td class="resource-location">
+              <span *ngIf="resource.ipAddress">{{ resource.ipAddress }}</span>
+              <span *ngIf="resource.serviceUrl">{{ resource.serviceUrl }}</span>
             </td>
-            <td>
-              <div class="usage-cell">
-                <span class="metric-value" [ngClass]="getUsageClass(resource.diskUsage)">
-                  {{ resource.diskUsage }}%
-                </span>
-                <div class="progress-bar">
-                  <div class="progress-fill" [ngClass]="getUsageClass(resource.diskUsage)" [style.width.%]="resource.diskUsage"></div>
-                </div>
-              </div>
-            </td>
-            <td class="resource-ip">{{ resource.ipAddress }}</td>
-            <td>{{ resource.region }}</td>
-            <td>
-              <a [routerLink]="['/app', app.id, 'resource', resource.id]" class="btn-detail">Chi tiết</a>
+            <td class="resource-actions">
+              <a [routerLink]="['resource', resource.id]" class="btn-detail">
+                Chi tiết
+              </a>
             </td>
           </tr>
         </tbody>

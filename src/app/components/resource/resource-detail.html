@@ -24,7 +24,7 @@
   <div class="tab-content" *ngIf="activeTab === 'dashboard'">
     <div class="dashboard-grid resource-dashboard">
       <!-- Real-time Graph Widget -->
-      <div class="dashboard-card real-time-widget">
+      <div class="dashboard-card real-time-widget" *ngIf="resource.type !== 'External Service'">
         <h3>Real-time Metrics</h3>
         <div class="chart-container">
           <canvas #realTimeChart></canvas>
@@ -49,22 +49,59 @@
           </div>
         </div>
       </div>
+
+      <!-- External Service Health Check Widget -->
+      <div class="dashboard-card health-check-widget" *ngIf="resource.type === 'External Service'">
+        <h3>Health Check Status</h3>
+        <div class="health-check-container">
+          <div class="health-status">
+            <div class="status-indicator" [ngClass]="getResourceStatusClass(resource.status)">
+              <span class="status-dot"></span>
+              <span class="status-text">{{ resource.status }}</span>
+            </div>
+          </div>
+          <div class="health-metrics">
+            <div class="health-metric">
+              <span class="metric-label">Response Time:</span>
+              <span class="metric-value">{{ resource.responseTime }}ms</span>
+            </div>
+            <div class="health-metric">
+              <span class="metric-label">Uptime:</span>
+              <span class="metric-value">{{ resource.uptime }}</span>
+            </div>
+            <div class="health-metric">
+              <span class="metric-label">Last Check:</span>
+              <span class="metric-value">{{ resource.lastHealthCheck }}</span>
+            </div>
+          </div>
+          <div class="service-urls">
+            <div class="url-item">
+              <span class="url-label">Service URL:</span>
+              <a [href]="resource.serviceUrl" target="_blank" class="url-link">{{ resource.serviceUrl }}</a>
+            </div>
+            <div class="url-item">
+              <span class="url-label">Health Check URL:</span>
+              <a [href]="resource.healthCheckUrl" target="_blank" class="url-link">{{ resource.healthCheckUrl }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <!-- Performance Metrics Card -->
-      <div class="dashboard-card">
+      <div class="dashboard-card" *ngIf="resource.type !== 'External Service'">
         <h3>Hiệu suất</h3>
         <div class="metrics-grid">
           <div class="metric-item">
             <div class="metric-header">
               <span class="metric-label">CPU Usage</span>
-              <span class="metric-value" [ngClass]="getUsageClass(resource.cpuUsage!)">
-                {{ resource.cpuUsage }}%
+              <span class="metric-value" [ngClass]="getUsageClass(resource.cpuUsage || 0)">
+                {{ resource.cpuUsage || 0 }}%
               </span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" 
-                   [ngClass]="getUsageClass(resource.cpuUsage!)"
-                   [style.width.%]="resource.cpuUsage">
+                   [ngClass]="getUsageClass(resource.cpuUsage || 0)"
+                   [style.width.%]="resource.cpuUsage || 0">
               </div>
             </div>
           </div>
@@ -72,14 +109,14 @@
           <div class="metric-item">
             <div class="metric-header">
               <span class="metric-label">Memory Usage</span>
-              <span class="metric-value" [ngClass]="getUsageClass(resource.memoryUsage!)">
-                {{ resource.memoryUsage }}%
+              <span class="metric-value" [ngClass]="getUsageClass(resource.memoryUsage || 0)">
+                {{ resource.memoryUsage || 0 }}%
               </span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" 
-                   [ngClass]="getUsageClass(resource.memoryUsage!)"
-                   [style.width.%]="resource.memoryUsage">
+                   [ngClass]="getUsageClass(resource.memoryUsage || 0)"
+                   [style.width.%]="resource.memoryUsage || 0">
               </div>
             </div>
           </div>
@@ -87,14 +124,14 @@
           <div class="metric-item">
             <div class="metric-header">
               <span class="metric-label">Disk Usage</span>
-              <span class="metric-value" [ngClass]="getUsageClass(resource.diskUsage!)">
-                {{ resource.diskUsage }}%
+              <span class="metric-value" [ngClass]="getUsageClass(resource.diskUsage || 0)">
+                {{ resource.diskUsage || 0 }}%
               </span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" 
-                   [ngClass]="getUsageClass(resource.diskUsage!)"
-                   [style.width.%]="resource.diskUsage">
+                   [ngClass]="getUsageClass(resource.diskUsage || 0)"
+                   [style.width.%]="resource.diskUsage || 0">
               </div>
             </div>
           </div>
@@ -123,13 +160,25 @@
               {{ resource.status }}
             </span>
           </div>
-          <div class="info-item">
+          <!-- Regular resource info -->
+          <div class="info-item" *ngIf="resource.type !== 'External Service'">
             <span class="info-label">IP Address:</span>
             <span class="info-value resource-ip">{{ resource.ipAddress }}</span>
           </div>
-          <div class="info-item">
+          <div class="info-item" *ngIf="resource.type !== 'External Service'">
             <span class="info-label">Region:</span>
             <span class="info-value">{{ resource.region }}</span>
+          </div>
+          <!-- External service info -->
+          <div class="info-item" *ngIf="resource.type === 'External Service'">
+            <span class="info-label">Service URL:</span>
+            <span class="info-value">
+              <a [href]="resource.serviceUrl" target="_blank" class="url-link">{{ resource.serviceUrl }}</a>
+            </span>
+          </div>
+          <div class="info-item" *ngIf="resource.type === 'External Service'">
+            <span class="info-label">Response Time:</span>
+            <span class="info-value">{{ resource.responseTime }}ms</span>
           </div>
         </div>
       </div>
@@ -154,7 +203,7 @@
       <div class="configure-actions">
         <button 
           class="btn btn-primary" 
-          *ngIf="!isEditing"
+          *ngIf="!isEditing && resource.type !== 'External Service'"
           (click)="toggleEdit()">
           Chỉnh sửa
         </button>
@@ -173,7 +222,8 @@
       </div>
     </div>
 
-    <div class="configure-content" *ngIf="resource.config">
+    <!-- Regular Resource Configuration -->
+    <div class="configure-content" *ngIf="resource.config && resource.type !== 'External Service'">
       <div class="config-section">
         <h3>Scaling</h3>
         <div class="config-grid">
@@ -217,7 +267,49 @@
         </div>
       </div>
     </div>
-    <div class="configure-content" *ngIf="!resource.config">
+
+    <!-- External Service Configuration -->
+    <div class="configure-content" *ngIf="resource.type === 'External Service'">
+      <div class="config-section">
+        <h3>External Service Configuration</h3>
+        <div class="config-grid">
+          <div class="config-item">
+            <label class="config-label">Service URL:</label>
+            <input 
+              type="text" 
+              [value]="resource.serviceUrl"
+              disabled>
+          </div>
+          <div class="config-item">
+            <label class="config-label">Health Check URL:</label>
+            <input 
+              type="text" 
+              [value]="resource.healthCheckUrl"
+              disabled>
+          </div>
+          <div class="config-item">
+            <label class="config-label">Response Time:</label>
+            <input 
+              type="text" 
+              [value]="resource.responseTime + 'ms'"
+              disabled>
+          </div>
+          <div class="config-item">
+            <label class="config-label">Uptime:</label>
+            <input 
+              type="text" 
+              [value]="resource.uptime"
+              disabled>
+          </div>
+        </div>
+        <div class="config-note">
+          <p><strong>Lưu ý:</strong> Cấu hình của External Service được quản lý bởi nhà cung cấp dịch vụ bên thứ 3.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Configuration Available -->
+    <div class="configure-content" *ngIf="!resource.config && resource.type !== 'External Service'">
       <div class="no-resources">
         <p>Resource này không có cấu hình nào.</p>
       </div>

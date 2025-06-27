@@ -13,13 +13,19 @@ interface ResourceConfig {
 interface Resource {
   id: number;
   name: string;
-  type: 'Server' | 'Database' | 'Load Balancer' | 'Cache';
+  type: 'Server' | 'Database' | 'Load Balancer' | 'Cache' | 'External Service';
   status: 'Online' | 'Offline' | 'Error';
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
-  ipAddress: string;
-  region: string;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  diskUsage?: number;
+  ipAddress?: string;
+  region?: string;
+  // External Service specific properties
+  serviceUrl?: string;
+  healthCheckUrl?: string;
+  lastHealthCheck?: string;
+  responseTime?: number; // in milliseconds
+  uptime?: string;
   config?: ResourceConfig;
 }
 
@@ -79,6 +85,8 @@ export class AppDetailComponent implements OnInit {
         { id: 102, name: 'Web Server 2 (Replica)', type: 'Server', status: 'Online', cpuUsage: 48, memoryUsage: 58, diskUsage: 25, ipAddress: '192.168.1.12', region: 'us-east-1', config: { autoScaling: true, minInstances: 2, maxInstances: 10, healthCheckPath: '/health' } },
         { id: 103, name: 'Main Database', type: 'Database', status: 'Online', cpuUsage: 30, memoryUsage: 75, diskUsage: 40, ipAddress: '192.168.1.11', region: 'us-east-1', config: { autoScaling: false, minInstances: 1, maxInstances: 1, healthCheckPath: '/status' } },
         { id: 104, name: 'Redis Cache', type: 'Cache', status: 'Online', cpuUsage: 12, memoryUsage: 22, diskUsage: 5, ipAddress: '192.168.1.13', region: 'us-east-1', config: { autoScaling: false, minInstances: 1, maxInstances: 1, healthCheckPath: '/ping' } },
+        { id: 105, name: 'Stripe Payment Gateway', type: 'External Service', status: 'Online', serviceUrl: 'https://api.stripe.com', healthCheckUrl: 'https://api.stripe.com/health', lastHealthCheck: '2024-01-15 10:30:00', responseTime: 45, uptime: '99.99%' },
+        { id: 106, name: 'SendGrid Email Service', type: 'External Service', status: 'Online', serviceUrl: 'https://api.sendgrid.com', healthCheckUrl: 'https://status.sendgrid.com/api/v2/status.json', lastHealthCheck: '2024-01-15 10:29:00', responseTime: 120, uptime: '99.95%' },
       ],
       config: { autoRestart: true, maxMemory: 2048, maxCpu: 80, logLevel: 'info', backupEnabled: true, monitoringEnabled: true }
     },
@@ -220,14 +228,10 @@ export class AppDetailComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'Running':
-        return 'status-running';
-      case 'Stopped':
-        return 'status-stopped';
-      case 'Error':
-        return 'status-error';
-      default:
-        return '';
+      case 'Online': return 'status-online';
+      case 'Offline': return 'status-offline';
+      case 'Error': return 'status-error';
+      default: return 'status-unknown';
     }
   }
 
@@ -261,6 +265,17 @@ export class AppDetailComponent implements OnInit {
     if (usage >= 80) return 'usage-critical';
     if (usage >= 60) return 'usage-warning';
     return 'usage-normal';
+  }
+
+  getTypeClass(type: string): string {
+    switch (type) {
+      case 'Server': return 'type-server';
+      case 'Database': return 'type-database';
+      case 'Load Balancer': return 'type-loadbalancer';
+      case 'Cache': return 'type-cache';
+      case 'External Service': return 'type-external';
+      default: return 'type-unknown';
+    }
   }
 
   goBack() {
